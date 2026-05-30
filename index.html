@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misi Jawi Superhero - Belajar Jawi Interaktif</title>
+    <!-- Google Fonts untuk tipografi yang menarik dan mesra kanak-kanak -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN untuk reka bentuk responsif yang pantas -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        superhero: {
+                            blue: '#1e3a8a',
+                            red: '#dc2626',
+                            yellow: '#facc15',
+                            purple: '#7c3aed',
+                            dark: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Gaya tambahan untuk tema komik/superhero */
+        body {
+            background-color: #0f172a;
+            background-image: radial-gradient(#1e293b 2px, transparent 2px);
+            background-size: 24px 24px;
+        }
+
+        .comic-border {
+            border: 4px solid #000;
+            box-shadow: 4px 4px 0px #000;
+        }
+
+        .comic-btn {
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0px #000;
+            transition: all 0.1s ease;
+        }
+
+        .comic-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        /* Animasi kilat / pulsing */
+        @keyframes pulse-fast {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-hero {
+            animation: pulse-fast 2s infinite ease-in-out;
+        }
+
+        /* Kesan partikel semasa jawapan betul */
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: explode 0.6s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Jawi font style */
+        .jawi-text {
+            direction: rtl;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white flex flex-col justify-between overflow-x-hidden">
+
+    <!-- HEADER / HERO STATUS BAR (Disembunyikan pada skrin selamat datang) -->
+    <header id="main-header" class="hidden bg-slate-900 border-b-4 border-black p-3 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Profil Avatar Ringkas -->
+            <div class="flex items-center gap-3">
+                <span id="header-avatar" class="text-3xl">⚡</span>
+                <div>
+                    <h2 id="header-name" class="font-bold text-lg text-superhero-yellow">Wira Jawi</h2>
+                    <span id="badge-title" class="text-xs bg-superhero-purple px-2 py-0.5 rounded-full font-bold uppercase tracking-wider text-white">REKRUT BARU</span>
+                </div>
+            </div>
+
+            <!-- Bilangan XP dan Tahap (Level) -->
+            <div class="flex items-center gap-4 flex-1 justify-end max-w-md">
+                <div class="w-full bg-slate-800 rounded-full h-6 border-2 border-black relative overflow-hidden flex items-center">
+                    <div id="xp-bar" class="bg-superhero-yellow h-full transition-all duration-300" style="width: 0%"></div>
+                    <span class="absolute w-full text-center text-xs font-black text-black" id="xp-text">0 / 100 XP</span>
+                </div>
+                <div class="bg-superhero-red text-white comic-border font-black px-3 py-1 text-center rounded transform rotate-3 min-w-[70px]">
+                    <div class="text-[9px] uppercase leading-none">TAHAP</div>
+                    <div class="text-xl leading-none" id="hero-level">1</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- KAWASAN KANDUNGAN UTAMA -->
+    <main class="flex-grow flex items-center justify-center p-4 max-w-4xl w-full mx-auto">
+
+        <!-- ===== SKRIN 1: SELAMAT DATANG / PILIH AVATAR ===== -->
+        <section id="screen-welcome" class="w-full bg-slate-800 comic-border rounded-2xl p-6 md:p-8 text-center relative overflow-hidden">
+            <!-- Tajuk Utama Bergaya Komik -->
+            <div class="relative inline-block mb-6">
+                <div class="bg-superhero-red text-white text-3xl md:text-5xl font-black px-6 py-3 comic-border uppercase tracking-wider transform -rotate-2 select-none">
+                    MISI JAWI HERO! ⚡
+                </div>
+                <div class="absolute -top-4 -right-4 bg-superhero-yellow text-black font-black text-xs px-2 py-1 rounded border-2 border-black uppercase transform rotate-12">
+                    Interaktif!
+                </div>
+            </div>
+
+            <p class="text-slate-300 text-sm md:text-base mb-6 max-w-lg mx-auto">
+                Sertai Akademi Superhero Jawi! Selesaikan 3 Misi penting untuk menyelamatkan Bandar Huruf daripada penjahat 'Kabur'. Pilih wira anda dan mulakan latihan sekarang!
+            </p>
+
+            <!-- Borang Daftar & Pilihan Watak -->
+            <div class="max-w-md mx-auto mb-8 text-left bg-slate-900 p-5 rounded-xl border-2 border-slate-700">
+                <label class="block text-superhero-yellow font-bold mb-2 text-sm uppercase tracking-wider">Nama Kod Superhero Anda:</label>
+                <input type="text" id="player-name" placeholder="cth: KAPTEN AMIN / SURIA" class="w-full p-3 rounded-lg border-2 border-black bg-slate-800 text-white font-bold focus:outline-none focus:border-superhero-yellow uppercase tracking-wide text-center mb-6">
+
+                <label class="block text-superhero-yellow font-bold mb-3 text-sm uppercase tracking-wider text-center">Pilih Avatar Kuasa Anda:</label>
+                <div class="grid grid-cols-4 gap-2" id="avatar-container">
+                    <!-- Avatar kad akan dimasukkan oleh JS -->
+                </div>
+            </div>
+
+            <!-- Butang Mula -->
+            <button onclick="startGame()" class="comic-btn bg-superhero-yellow hover:bg-yellow-300 text-black font-black text-xl md:text-2xl px-10 py-4 rounded-full uppercase tracking-wider w-full max-w-xs transition-transform transform hover:scale-105">
+                Mulakan Misi! 🚀
+            </button>
+        </section>
+
+        <!-- ===== SKRIN 2: PERMAINAN (MISI UTAMA) ===== -->
+        <section id="screen-game" class="hidden w-full flex flex-col gap-6">
+            
+            <!-- Panduan Pengembaraan / Navigasi Misi -->
+            <div class="grid grid-cols-3 gap-2 md:gap-4">
+                <div id="btn-mission-1" class="comic-border bg-slate-800 p-2 md:p-3 rounded-xl text-center cursor-not-allowed opacity-50 flex flex-col justify-center items-center">
+                    <span class="text-xl md:text-2xl">🔗</span>
+                    <span class="text-[10px] md:text-xs font-black uppercase mt-1">Misi 1: Padanan</span>
+                </div>
+                <div id="btn-mission-2" class="comic-border bg-slate-800 p-2 md:p-3 rounded-xl text-center cursor-not-allowed opacity-50 flex flex-col justify-center items-center">
+                    <span class="text-xl md:text-2xl">🧱</span>
+                    <span class="text-[10px] md:text-xs font-black uppercase mt-1">Misi 2: Eja Kata</span>
+                </div>
+                <div id="btn-mission-3" class="comic-border bg-slate-800 p-2 md:p-3 rounded-xl text-center cursor-not-allowed opacity-50 flex flex-col justify-center items-center">
+                    <span class="text-xl md:text-2xl">🏆</span>
+                    <span class="text-[10px] md:text-xs font-black uppercase mt-1">Misi 3: Kuiz Pintar</span>
+                </div>
+            </div>
+
+            <!-- Kad Permainan Utama -->
+            <div class="bg-slate-800 comic-border rounded-2xl p-5 md:p-8 relative min-h-[400px] flex flex-col justify-between">
+                
+                <!-- Kotak Info Misi Aktif -->
+                <div class="flex justify-between items-center border-b-2 border-slate-700 pb-3 mb-4">
+                    <div>
+                        <span id="mission-badge" class="bg-superhero-red text-white text-xs font-black px-2 py-1 rounded uppercase mr-2">MISI AKTIF</span>
+                        <h3 id="mission-title" class="inline-block text-lg font-bold text-superhero-yellow">Mengumpul Kuasa Huruf</h3>
+                    </div>
+                    <div id="mission-score" class="font-black text-sm text-green-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-700">
+                        Markah: 0
+                    </div>
+                </div>
+
+                <!-- TEMPAT PERMAINAN DINAMIK DIJANAKAN OLEH JS -->
+                <div id="game-arena" class="flex-grow flex flex-col justify-center items-center my-4">
+                    <!-- Area Permainan Dinamik -->
+                </div>
+
+                <!-- Footer Permainan: Navigasi/Bantuan -->
+                <div class="flex flex-col md:flex-row justify-between items-center gap-3 border-t-2 border-slate-700 pt-4 mt-4">
+                    <p id="mission-instruction" class="text-slate-400 text-xs md:text-sm text-center md:text-left">
+                        Sentuh huruf Jawi, kemudian sentuh bunyi Rumi yang sepadan!
+                    </p>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="skipMission()" class="comic-btn bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs px-4 py-2 rounded-lg uppercase w-1/2 md:w-auto">
+                            Langkau ⏭️
+                        </button>
+                        <button id="next-action-btn" onclick="nextAction()" class="comic-btn bg-superhero-yellow text-black font-black text-xs px-6 py-2 rounded-lg uppercase w-1/2 md:w-auto opacity-50 cursor-not-allowed" disabled>
+                            Seterusnya ➡️
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===== SKRIN 3: KEJAYAAN / TAHNIAH ===== -->
+        <section id="screen-victory" class="hidden w-full bg-slate-800 comic-border rounded-2xl p-6 md:p-8 text-center relative overflow-hidden">
+            <!-- Kesan Sinaran/Sunburst di latar belakang -->
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.15)_0%,transparent_60%)] animate-pulse"></div>
+
+            <span class="text-6xl md:text-8xl block mb-4 pulse-hero" id="victory-badge-emoji">🏆</span>
+            
+            <h1 class="text-3xl md:text-5xl font-black text-superhero-yellow uppercase tracking-widest mb-2">MISI BERJAYA!</h1>
+            <p class="text-lg text-white mb-6">Tahniah Superhero <span id="victory-hero-name" class="font-black text-superhero-red">AMIN</span>!</p>
+
+            <!-- Ringkasan Markah & Lencana -->
+            <div class="bg-slate-900 border-2 border-slate-700 rounded-xl p-5 max-w-md mx-auto mb-8 relative z-10">
+                <h3 class="text-sm uppercase text-slate-400 font-bold mb-3 tracking-wider">Pencapaian Anda:</h3>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <span class="text-xs text-slate-400 block uppercase">Jumlah XP</span>
+                        <span id="victory-xp" class="text-2xl font-black text-superhero-yellow">150</span>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <span class="text-xs text-slate-400 block uppercase">Tahap Dicapai</span>
+                        <span id="victory-level" class="text-2xl font-black text-superhero-red">3</span>
+                    </div>
+                </div>
+
+                <h4 class="text-xs uppercase text-slate-400 font-bold mb-2 tracking-wider">Lencana Dikumpul:</h4>
+                <div id="victory-badges" class="flex flex-wrap justify-center gap-3">
+                    <!-- Senarai lencana dijana oleh JS -->
+                </div>
+            </div>
+
+            <!-- Butang Bermain Semula -->
+            <div class="flex justify-center gap-4">
+                <button onclick="resetGame()" class="comic-btn bg-superhero-yellow hover:bg-yellow-300 text-black font-black text-lg px-8 py-3 rounded-full uppercase tracking-wider transition-transform transform hover:scale-105 relative z-10">
+                    Main Semula! 🔄
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- NOTIFIKASI MODAL SEMENTARA (MENGGANTIKAN ALERT) -->
+    <div id="toast-notif" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900 comic-border px-6 py-3 rounded-xl flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none">
+        <span id="toast-emoji" class="text-2xl">⚡</span>
+        <p id="toast-message" class="font-bold text-white text-sm md:text-base"></p>
+    </div>
+
+    <!-- FOOTER KECIL -->
+    <footer class="text-center text-xs text-slate-500 py-4 border-t border-slate-800">
+        Misi Jawi Superhero © 2026. Direka khas untuk pembelajaran interaktif kanak-kanak.
+    </footer>
+
+    <!-- JAVASCRIPT: LOGIK PERMAINAN & KESAN BUNYI -->
+    <script>
+        /**
+         * PENGATURAN STATE & PEMENANG (STATE MANAGEMENT)
+         * Menyimpan informasi pemain, misi aktif, dan pencapaian.
+         */
+        const state = {
+            player: {
+                name: "REKRUT",
+                avatar: "⚡",
+                xp: 0,
+                level: 1,
+                badges: []
+            },
+            currentMission: 1,
+            score: 0,
+            missionComplete: false,
+            // Simpan huruf yang dipilih pada Misi 1
+            selectedJawi: null,
+            selectedRumi: null,
+            matchedPairsCount: 0,
+            // Misi 2: Ejaan terpilih
+            currentWordData: null,
+            spelledWordLetters: [],
+            // Misi 3: Kuiz
+            currentQuizIndex: 0,
+            quizTimer: null,
+            quizTimeLeft: 15
+        };
+
+        // Pilihan Avatar Superhero yang Menarik
+        const avatars = [
+            { emoji: "⚡", name: "Gadis Kilat", color: "bg-amber-500" },
+            { emoji: "🔥", name: "Wira Api", color: "bg-red-500" },
+            { emoji: "❄️", name: "Puteri Ais", color: "bg-sky-400" },
+            { emoji: "🐱", name: "Kucing Sado", color: "bg-purple-500" },
+            { emoji: "🛡️", name: "Kapten Jawi", color: "bg-blue-600" },
+            { emoji: "🚀", name: "Penerbang Angkasa", color: "bg-emerald-500" },
+            { emoji: "🌸", name: "Bunga Sakti", color: "bg-pink-500" },
+            { emoji: "🐯", name: "Harimau Malaya", color: "bg-orange-500" }
+        ];
+
+        // Koleksi Lencana (Badges) yang boleh dibuka
+        const badgesData = {
+            "pahlawan_huruf": { title: "Pahlawan Huruf", emoji: "🔰", desc: "Selesaikan Misi Padanan Kilat!" },
+            "pakar_eja": { title: "Pakar Eja Jawi", emoji: "✍️", desc: "Selesaikan Misi Pembina Kata!" },
+            "genius_jawi": { title: "Genius Jawi", emoji: "🧠", desc: "Selesaikan Misi Kuiz Pintar!" },
+            "super_tahap_3": { title: "Hero Kelas Utama", emoji: "👑", desc: "Mencapai Tahap 3!" }
+        };
+
+        // Data Permainan Misi 1: Padanan Huruf Jawi & Bunyi Rumi
+        const mission1Letters = [
+            { jawi: "ا", rumi: "A" },
+            { jawi: "ب", rumi: "B" },
+            { jawi: "ت", rumi: "T" },
+            { jawi: "ج", rumi: "J" },
+            { jawi: "د", rumi: "D" },
+            { jawi: "ر", rumi: "R" },
+            { jawi: "س", rumi: "S" },
+            { jawi: "ڤ", rumi: "P" },
+            { jawi: "چ", rumi: "C" },
+            { jawi: "ݢ", rumi: "G" }
+        ];
+
+        // Data Permainan Misi 2: Eja Perkataan
+        // Memadankan imej emoji dengan perkataan Jawi dan huruf-huruf tunggalnya
+        const mission2Words = [
+            { word: "BOLA", jawi: "بولا", letters: ["ب", "و", "ل", "ا"], emoji: "⚽", hint: "Sukan kegemaran ramai." },
+            { word: "BUKU", jawi: "بوكو", letters: ["ب", "و", "ك", "و"], emoji: "📚", hint: "Membaca jambatan ilmu." },
+            { word: "NASI", jawi: "ناسي", letters: ["ن", "ا", "س", "ي"], emoji: "🍚", hint: "Makanan ruji kita." },
+            { word: "CIKU", jawi: "چيكو", letters: ["چ", "ي", "ك", "و"], emoji: "🥔", hint: "Buah manis berwarna perang." }
+        ];
+
+        // Data Permainan Misi 3: Kuiz Pilihan Ganda
+        const mission3Quiz = [
+            {
+                question: "Manakah huruf Jawi bagi bunyi huruf 'P'?",
+                options: ["ب", "ڤ", "ت", "ج"],
+                correct: 1, // ڤ
+                hint: "Sama seperti Ba, tetapi ada 3 titik di atas."
+            },
+            {
+                question: "Ejaan Jawi bagi perkataan 'SATA' (sejenis makanan tradisional) ialah?",
+                options: ["ساتا", "ساتو", "سيتي", "سوتو"],
+                correct: 0, // ساتا
+                hint: "Gabungan huruf Sin + Alif + Ta + Alif."
+            },
+            {
+                question: "Apakah bunyi bagi perkataan Jawi ini: <b>جاري</b> ?",
+                options: ["Cari", "Dari", "Jari", "Lari"],
+                correct: 2, // Jari
+                hint: "Huruf pertama ialah Jim (J)."
+            },
+            {
+                question: "Huruf tunggal <b>چ</b> berbunyi?",
+                options: ["B", "C", "J", "G"],
+                correct: 1, // C
+                hint: "Namanya huruf Cha."
+            }
+        ];
+
+        /**
+         * PENGASASAN AUDIO (WEB AUDIO API)
+         * Menjana kesan bunyi retro/game secara sintesis tanpa memerlukan fail luaran.
+         */
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        // Kesan bunyi jawapan betul (Arpeggio naik)
+        function playSoundCorrect() {
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                
+                // Bunyi 1 (C5)
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(523.25, now);
+                gain1.gain.setValueAtTime(0.1, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.15);
+
+                // Bunyi 2 (E5) pada waktu t+0.08
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(659.25, now + 0.08);
+                gain2.gain.setValueAtTime(0.1, now + 0.08);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.23);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(now + 0.08);
+                osc2.stop(now + 0.23);
+
+                // Bunyi 3 (G5) pada waktu t+0.16
+                const osc3 = ctx.createOscillator();
+                const gain3 = ctx.createGain();
+                osc3.type = 'sine';
+                osc3.frequency.setValueAtTime(783.99, now + 0.16);
+                gain3.gain.setValueAtTime(0.15, now + 0.16);
+                gain3.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc3.connect(gain3);
+                gain3.connect(ctx.destination);
+                osc3.start(now + 0.16);
+                osc3.stop(now + 0.4);
+            } catch (e) {
+                // Gagal bersuara jika disekat pelayar sebelum interaksi pertama
+            }
+        }
+
+        // Kesan bunyi jawapan salah (Siren menurun)
+        function playSoundWrong() {
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.3);
+                
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } catch (e) {}
+        }
+
+        // Kesan bunyi naik tahap (Triumph Fanfare)
+        function playSoundLevelUp() {
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                const freqs = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+                
+                freqs.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + (idx * 0.1));
+                    
+                    gain.gain.setValueAtTime(0.08, now + (idx * 0.1));
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + (idx * 0.1) + 0.3);
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    osc.start(now + (idx * 0.1));
+                    osc.stop(now + (idx * 0.1) + 0.3);
+                });
+            } catch (e) {}
+        }
+
+        /**
+         * FUNGSI UTILITI & INTERAKSI (UI & EFFECTS)
+         */
+        
+        // Membuka paparan notifikasi sementara (custom toast)
+        function showToast(message, emoji = "⚡") {
+            const toast = document.getElementById("toast-notif");
+            const tMsg = document.getElementById("toast-message");
+            const tEmoji = document.getElementById("toast-emoji");
+
+            tMsg.innerText = message;
+            tEmoji.innerText = emoji;
+
+            toast.classList.remove("opacity-0", "translate-y-10", "pointer-events-none");
+            toast.classList.add("opacity-100", "translate-y-0");
+
+            setTimeout(() => {
+                toast.classList.remove("opacity-100", "translate-y-0");
+                toast.classList.add("opacity-0", "translate-y-10", "pointer-events-none");
+            }, 2500);
+        }
+
+        // Kesan Letupan Sparkle (Visual Confetti) pada kedudukan tertentu
+        function createSparks(element) {
+            const rect = element.getBoundingClientRect();
+            const container = document.body;
+            const x = rect.left + rect.width / 2 + window.scrollX;
+            const y = rect.top + rect.height / 2 + window.scrollY;
+
+            const colors = ['#facc15', '#dc2626', '#3b82f6', '#10b981', '#8b5cf6'];
+
+            for (let i = 0; i < 20; i++) {
+                const spark = document.createElement("div");
+                spark.classList.add("sparkle");
+                spark.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                spark.style.left = `${x}px`;
+                spark.style.top = `${y}px`;
+
+                // Set arah dan jarak letupan secara rawak
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 80;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                spark.style.setProperty('--tx', `${tx}px`);
+                spark.style.setProperty('--ty', `${ty}px`);
+
+                container.appendChild(spark);
+
+                // Buang elemen selepas animasi tamat
+                setTimeout(() => {
+                    spark.remove();
+                }, 600);
+            }
+        }
+
+        // Memilih rawak elemen dari senarai array
+        function getRandomElements(arr, num) {
+            const shuffled = [...arr].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, num);
+        }
+
+        /**
+         * LOGIK PERMAINAN: INI ALALAH HUB UTAMA ALIRAN PERMAINAN
+         */
+
+        // Fungsi penyediaan skrin awal & pemilihan avatar
+        window.onload = function() {
+            const container = document.getElementById("avatar-container");
+            avatars.forEach((avatar, index) => {
+                const isSelected = index === 0;
+                const card = document.createElement("div");
+                card.id = `avatar-card-${index}`;
+                card.className = `p-3 rounded-xl border-2 cursor-pointer transition-all text-center flex flex-col items-center ${avatar.color} ${isSelected ? 'border-yellow-400 scale-105 shadow-lg' : 'border-black'}`;
+                card.innerHTML = `
+                    <span class="text-3xl mb-1">${avatar.emoji}</span>
+                    <span class="text-[10px] font-bold uppercase text-white tracking-tight">${avatar.name}</span>
+                `;
+                card.onclick = () => selectAvatar(index);
+                container.appendChild(card);
+            });
+            
+            // Set avatar permulaan lalai
+            state.player.avatar = avatars[0].emoji;
+        };
+
+        // Memilih avatar
+        function selectAvatar(index) {
+            avatars.forEach((_, idx) => {
+                const card = document.getElementById(`avatar-card-${idx}`);
+                if (idx === index) {
+                    card.classList.add("border-yellow-400", "scale-105", "shadow-lg");
+                    card.classList.remove("border-black");
+                    state.player.avatar = avatars[idx].emoji;
+                } else {
+                    card.classList.remove("border-yellow-400", "scale-105", "shadow-lg");
+                    card.classList.add("border-black");
+                }
+            });
+            getAudioContext(); // Mengaktifkan Audio Context semasa interaksi pertama
+            playSoundCorrect();
+        }
+
+        // Memulakan Permainan dari Skrin Welcome
+        function startGame() {
+            const nameInput = document.getElementById("player-name").value.trim();
+            if (nameInput) {
+                state.player.name = nameInput.toUpperCase();
+            } else {
+                state.player.name = "WIRA JAWI";
+            }
+
+            // Kemas kini paparan profil
+            document.getElementById("header-name").innerText = state.player.name;
+            document.getElementById("header-avatar").innerText = state.player.avatar;
+
+            // Alihkan Skrin
+            document.getElementById("screen-welcome").classList.add("hidden");
+            document.getElementById("main-header").classList.remove("hidden");
+            document.getElementById("screen-game").classList.remove("hidden");
+
+            // Mulakan Misi 1
+            loadMission(1);
+        }
+
+        // Kemas kini status bar pemain
+        function updateStatusBar() {
+            const xpBar = document.getElementById("xp-bar");
+            const xpText = document.getElementById("xp-text");
+            const heroLevelDisp = document.getElementById("hero-level");
+            const badgeTitle = document.getElementById("badge-title");
+
+            // Kiraan level berasaskan XP (Setiap 100 XP naik tahap)
+            const oldLevel = state.player.level;
+            const newLevel = Math.floor(state.player.xp / 100) + 1;
+            state.player.level = newLevel;
+
+            if (newLevel > oldLevel) {
+                playSoundLevelUp();
+                showToast(`TAHNIAH! Anda naik ke TAHAP ${newLevel}! 💪`, "👑");
+                // Anugerah lencana khas jika capai Tahap 3
+                if (newLevel >= 3) {
+                    unlockBadge("super_tahap_3");
+                }
+            }
+
+            const currentXPInLevel = state.player.xp % 100;
+            xpBar.style.width = `${currentXPInLevel}%`;
+            xpText.innerText = `${currentXPInLevel} / 100 XP`;
+            heroLevelDisp.innerText = newLevel;
+
+            // Kemas kini Gelaran/Rank mengikut tahap
+            if (newLevel === 1) badgeTitle.innerText = "REKRUT BARU";
+            else if (newLevel === 2) badgeTitle.innerText = "WIRA UTAMA";
+            else if (newLevel === 3) badgeTitle.innerText = "PELINDUNG JAWI";
+            else badgeTitle.innerText = "ADIPUTRA SEJATI";
+        }
+
+        // Sistem Pemberian Lencana
+        function unlockBadge(key) {
+            if (!state.player.badges.includes(key)) {
+                state.player.badges.push(key);
+                const badge = badgesData[key];
+                setTimeout(() => {
+                    showToast(`LENCANA BARU: ${badge.emoji} ${badge.title}!`, "🏆");
+                    playSoundLevelUp();
+                }, 1000);
+            }
+        }
+
+        // Kemas kini Butang Navigasi Misi
+        function updateMissionNav() {
+            for (let i = 1; i <= 3; i++) {
+                const navBtn = document.getElementById(`btn-mission-${i}`);
+                if (state.currentMission === i) {
+                    navBtn.className = "comic-border bg-superhero-purple p-2 md:p-3 rounded-xl text-center cursor-pointer scale-105 shadow-md flex flex-col justify-center items-center text-white";
+                } else if (state.currentMission > i) {
+                    navBtn.className = "comic-border bg-green-700 p-2 md:p-3 rounded-xl text-center cursor-pointer flex flex-col justify-center items-center text-slate-100";
+                } else {
+                    navBtn.className = "comic-border bg-slate-800 p-2 md:p-3 rounded-xl text-center cursor-not-allowed opacity-50 flex flex-col justify-center items-center text-slate-400";
+                }
+            }
+        }
+
+        // Memuatkan Misi Berdasarkan Nombor
+        function loadMission(missionNumber) {
+            state.currentMission = missionNumber;
+            state.missionComplete = false;
+            
+            // Tutup butang seterusnya buat sementara
+            const nextBtn = document.getElementById("next-action-btn");
+            nextBtn.disabled = true;
+            nextBtn.classList.add("opacity-50", "cursor-not-allowed");
+            nextBtn.classList.remove("bg-green-500", "text-white");
+            nextBtn.classList.add("bg-superhero-yellow", "text-black");
+
+            updateMissionNav();
+            updateStatusBar();
+
+            const arena = document.getElementById("game-arena");
+            const title = document.getElementById("mission-title");
+            const instruction = document.getElementById("mission-instruction");
+            arena.innerHTML = "";
+
+            if (missionNumber === 1) {
+                title.innerText = "Misi 1: Padanan Kilat";
+                instruction.innerText = "Suaikan Huruf Jawi yang sepadan dengan bunyi Ruminya!";
+                setupMission1(arena);
+            } else if (missionNumber === 2) {
+                title.innerText = "Misi 2: Pembina Perkataan";
+                instruction.innerText = "Sentuh huruf-huruf di bawah mengikut turutan untuk mengeja perkataan!";
+                setupMission2(arena);
+            } else if (missionNumber === 3) {
+                title.innerText = "Misi 3: Cabaran Pintar Jawi";
+                instruction.innerText = "Jawab soalan kuiz di bawah sebelum pemasa tamat!";
+                setupMission3(arena);
+            }
+        }
+
+        // Memintas/Melangkau Misi
+        function skipMission() {
+            showToast("Misi dilangkau! Sedia untuk misi seterusnya.", "⏭️");
+            completeMission(false); // Selesaikan misi tanpa bonus besar
+        }
+
+        // Selesaikan misi dan sedia untuk seterusnya
+        function completeMission(earnBonus = true) {
+            state.missionComplete = true;
+
+            // Hadiahkan XP dan Lencana mengikut Misi
+            if (earnBonus) {
+                if (state.currentMission === 1) {
+                    state.player.xp += 100;
+                    unlockBadge("pahlawan_huruf");
+                } else if (state.currentMission === 2) {
+                    state.player.xp += 100;
+                    unlockBadge("pakar_eja");
+                } else if (state.currentMission === 3) {
+                    state.player.xp += 100;
+                    unlockBadge("genius_jawi");
+                }
+            } else {
+                state.player.xp += 30; // XP kasihan jika skip
+            }
+
+            updateStatusBar();
+
+            // Aktifkan Butang Seterusnya
+            const nextBtn = document.getElementById("next-action-btn");
+            nextBtn.disabled = false;
+            nextBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            nextBtn.classList.remove("bg-superhero-yellow", "text-black");
+            nextBtn.classList.add("bg-green-500", "text-white");
+            
+            // Buat butang berkelip sedikit untuk menarik perhatian
+            nextBtn.classList.add("animate-pulse");
+        }
+
+        // Pengendali Butang Seterusnya
+        function nextAction() {
+            // Matikan animasi denyutan butang
+            document.getElementById("next-action-btn").classList.remove("animate-pulse");
+
+            if (state.currentMission < 3) {
+                loadMission(state.currentMission + 1);
+            } else {
+                showVictoryScreen();
+            }
+        }
+
+
+        /**
+         * IMPLEMENTASI PERMAINAN MISI 1: PADANAN KILAT
+         */
+        function setupMission1(container) {
+            state.selectedJawi = null;
+            state.selectedRumi = null;
+            state.matchedPairsCount = 0;
+
+            // Ambil 5 huruf rawak untuk dipadankan
+            const selectedSet = getRandomElements(mission1Letters, 5);
+            
+            // Asingkan senarai Jawi dan Rumi kemudian rawakkan posisinya
+            const jawiLetters = selectedSet.map(item => item.jawi).sort(() => Math.random() - 0.5);
+            const rumiLetters = selectedSet.map(item => item.rumi).sort(() => Math.random() - 0.5);
+
+            // Buat Grid Dua Lajur (Kiri: Jawi, Kanan: Rumi)
+            const grid = document.createElement("div");
+            grid.className = "grid grid-cols-2 gap-8 w-full max-w-md mx-auto";
+
+            // Lajur Huruf Jawi (Kanan ke Kiri dari perspektif visual tapi fleksibel)
+            const jawiCol = document.createElement("div");
+            jawiCol.className = "flex flex-col gap-3 justify-center";
+            jawiLetters.forEach(letter => {
+                const btn = document.createElement("button");
+                btn.id = `m1-jawi-${letter}`;
+                btn.className = "comic-btn bg-slate-900 border-2 border-black p-4 rounded-xl text-3xl font-black transition-all hover:bg-slate-700 jawi-text text-center flex items-center justify-center";
+                btn.innerText = letter;
+                btn.onclick = () => selectJawiLetter(letter);
+                jawiCol.appendChild(btn);
+            });
+
+            // Lajur Bunyi Rumi
+            const rumiCol = document.createElement("div");
+            rumiCol.className = "flex flex-col gap-3 justify-center";
+            rumiLetters.forEach(letter => {
+                const btn = document.createElement("button");
+                btn.id = `m1-rumi-${letter}`;
+                btn.className = "comic-btn bg-slate-900 border-2 border-black p-4 rounded-xl text-2xl font-black transition-all hover:bg-slate-700 text-center flex items-center justify-center";
+                btn.innerText = letter;
+                btn.onclick = () => selectRumiLetter(letter);
+                rumiCol.appendChild(btn);
+            });
+
+            grid.appendChild(jawiCol);
+            grid.appendChild(rumiCol);
+            container.appendChild(grid);
+        }
+
+        function selectJawiLetter(letter) {
+            if (state.missionComplete) return;
+
+            // Jika butang sudah matched, abaikan
+            const btn = document.getElementById(`m1-jawi-${letter}`);
+            if (btn.classList.contains("bg-green-600")) return;
+
+            // Bersihkan pilihan lama
+            if (state.selectedJawi) {
+                document.getElementById(`m1-jawi-${state.selectedJawi}`).classList.remove("bg-superhero-purple", "scale-105");
+            }
+
+            state.selectedJawi = letter;
+            btn.classList.add("bg-superhero-purple", "scale-105");
+
+            checkMatchingPairs();
+        }
+
+        function selectRumiLetter(letter) {
+            if (state.missionComplete) return;
+
+            const btn = document.getElementById(`m1-rumi-${letter}`);
+            if (btn.classList.contains("bg-green-600")) return;
+
+            // Bersihkan pilihan lama
+            if (state.selectedRumi) {
+                document.getElementById(`m1-rumi-${state.selectedRumi}`).classList.remove("bg-superhero-purple", "scale-105");
+            }
+
+            state.selectedRumi = letter;
+            btn.classList.add("bg-superhero-purple", "scale-105");
+
+            checkMatchingPairs();
+        }
+
+        function checkMatchingPairs() {
+            if (state.selectedJawi && state.selectedRumi) {
+                // Periksa padanan dalam pangkalan data
+                const match = mission1Letters.find(item => item.jawi === state.selectedJawi && item.rumi === state.selectedRumi);
+                
+                const jawiBtn = document.getElementById(`m1-jawi-${state.selectedJawi}`);
+                const rumiBtn = document.getElementById(`m1-rumi-${state.selectedRumi}`);
+
+                if (match) {
+                    // Betul! Kemas kini rupa fizikal butang
+                    playSoundCorrect();
+                    createSparks(jawiBtn);
+                    createSparks(rumiBtn);
+
+                    jawiBtn.className = "comic-border bg-green-600 text-white p-4 rounded-xl text-3xl font-black flex items-center justify-center jawi-text cursor-default";
+                    rumiBtn.className = "comic-border bg-green-600 text-white p-4 rounded-xl text-2xl font-black flex items-center justify-center cursor-default";
+
+                    state.matchedPairsCount++;
+                    state.score += 10;
+                    document.getElementById("mission-score").innerText = `Markah: ${state.score}`;
+
+                    // Selesai semua 5 pasangan?
+                    if (state.matchedPairsCount === 5) {
+                        showToast("Hebat! Anda menyelesaikan Misi Padanan Kilat!", "⚡");
+                        completeMission(true);
+                    }
+                } else {
+                    // Salah! Beri amaran warna merah seketika
+                    playSoundWrong();
+                    jawiBtn.classList.remove("bg-superhero-purple");
+                    rumiBtn.classList.remove("bg-superhero-purple");
+                    jawiBtn.classList.add("bg-red-600");
+                    rumiBtn.classList.add("bg-red-600");
+
+                    const currentJawi = state.selectedJawi;
+                    const currentRumi = state.selectedRumi;
+
+                    setTimeout(() => {
+                        const jB = document.getElementById(`m1-jawi-${currentJawi}`);
+                        const rB = document.getElementById(`m1-rumi-${currentRumi}`);
+                        if (jB && jB.classList.contains("bg-red-600")) {
+                            jB.classList.remove("bg-red-600");
+                        }
+                        if (rB && rB.classList.contains("bg-red-600")) {
+                            rB.classList.remove("bg-red-600");
+                        }
+                    }, 500);
+                }
+
+                // Tetapkan semula state pilihan untuk pusingan seterusnya
+                state.selectedJawi = null;
+                state.selectedRumi = null;
+            }
+        }
+
+
+        /**
+         * IMPLEMENTASI PERMAINAN MISI 2: PEMBINA PERKATAAN (WORD BUILDER)
+         */
+        function setupMission2(container) {
+            state.spelledWordLetters = [];
+            // Pilih satu perkataan secara rawak
+            const chosen = mission2Words[Math.floor(Math.random() * mission2Words.length)];
+            state.currentWordData = chosen;
+
+            // Bekas Utama Misi 2
+            const mainBox = document.createElement("div");
+            mainBox.className = "w-full max-w-md flex flex-col items-center gap-6";
+
+            // Visual Card Clue (Emoji, Nama, Hint)
+            const card = document.createElement("div");
+            card.className = "bg-slate-900 border-4 border-black p-4 rounded-xl text-center w-full shadow-lg relative";
+            card.innerHTML = `
+                <div class="absolute -top-4 left-4 bg-superhero-red text-white text-[10px] font-black px-2 py-0.5 rounded border-2 border-black uppercase transform -rotate-3">Petunjuk Rumi</div>
+                <div class="text-6xl mb-2">${chosen.emoji}</div>
+                <div class="text-2xl font-black text-superhero-yellow tracking-widest">${chosen.word}</div>
+                <p class="text-xs text-slate-400 mt-1 italic">"${chosen.hint}"</p>
+            `;
+            mainBox.appendChild(card);
+
+            // Kotak Jawapan (Suku kata/Huruf yang sedang disusun)
+            // Diatur dari Kanan ke Kiri (RTL) untuk paparan ejaan Jawi yang betul
+            const answerContainer = document.createElement("div");
+            answerContainer.className = "flex gap-2 justify-center flex-row-reverse w-full min-h-[70px] bg-slate-950 p-3 rounded-xl border-2 border-dashed border-slate-700";
+            answerContainer.id = "m2-answer-zone";
+
+            // Pasang slot kosong (placeholder) mengikut bilangan huruf
+            for (let i = 0; i < chosen.letters.length; i++) {
+                const slot = document.createElement("div");
+                slot.className = "w-12 h-12 bg-slate-800 rounded-lg border-2 border-slate-600 flex items-center justify-center text-2xl font-black text-slate-500";
+                slot.innerText = "?";
+                answerContainer.appendChild(slot);
+            }
+            mainBox.appendChild(answerContainer);
+
+            // Kotak Pilihan Huruf Jawi (Scrambled)
+            const lettersPool = document.createElement("div");
+            lettersPool.className = "flex gap-3 justify-center flex-wrap mt-4";
+            
+            // Rawakkan kedudukan huruf untuk permainan ejaan
+            const scrambledLetters = [...chosen.letters].sort(() => Math.random() - 0.5);
+            scrambledLetters.forEach((letter, index) => {
+                const charBtn = document.createElement("button");
+                charBtn.className = "comic-btn bg-slate-900 hover:bg-slate-700 text-white w-14 h-14 rounded-full border-2 border-black text-2xl font-black text-center flex items-center justify-center jawi-text transition-all";
+                charBtn.innerText = letter;
+                charBtn.onclick = () => selectLetterToSpell(charBtn, letter, index);
+                lettersPool.appendChild(charBtn);
+            });
+            mainBox.appendChild(lettersPool);
+
+            container.appendChild(mainBox);
+        }
+
+        function selectLetterToSpell(btn, letter, index) {
+            if (state.missionComplete) return;
+
+            const targetLetters = state.currentWordData.letters;
+            const nextRequiredLetter = targetLetters[state.spelledWordLetters.length];
+
+            if (letter === nextRequiredLetter) {
+                // Betul! Kemas kini slot ejaan
+                playSoundCorrect();
+                createSparks(btn);
+
+                state.spelledWordLetters.push(letter);
+                
+                // Nyahaktifkan butang huruf asal
+                btn.disabled = true;
+                btn.className = "w-14 h-14 rounded-full bg-green-700 opacity-40 text-white text-2xl font-black text-center flex items-center justify-center jawi-text cursor-default";
+
+                // Kemas kini paparan slot jawapan (diisi dari kanan ke kiri)
+                const answerZone = document.getElementById("m2-answer-zone");
+                const slots = answerZone.children;
+                // Oleh kerana susun atur flex-row-reverse, indeks ke-0 di HTML berada di sebelah kanan secara visual
+                slots[state.spelledWordLetters.length - 1].className = "w-12 h-12 bg-green-500 text-white rounded-lg border-2 border-black flex items-center justify-center text-2xl font-black jawi-text";
+                slots[state.spelledWordLetters.length - 1].innerText = letter;
+
+                // Markah bonus untuk ejaan betul
+                state.score += 15;
+                document.getElementById("mission-score").innerText = `Markah: ${state.score}`;
+
+                // Jika sudah tamat semua huruf diketik dengan betul
+                if (state.spelledWordLetters.length === targetLetters.length) {
+                    showToast(`Sempurna! Anda berjaya mengeja "${state.currentWordData.jawi}" (${state.currentWordData.word})!`, "✍️");
+                    completeMission(true);
+                }
+            } else {
+                // Salah! Nyalakan butang merah sementara
+                playSoundWrong();
+                const origClass = btn.className;
+                btn.className = "w-14 h-14 rounded-full bg-red-600 text-white text-2xl font-black text-center flex items-center justify-center jawi-text";
+                setTimeout(() => {
+                    if (btn.disabled === false) {
+                        btn.className = origClass;
+                    }
+                }, 500);
+                showToast("Salah huruf tu! Cari huruf permulaan yang betul.", "❌");
+            }
+        }
+
+
+        /**
+         * IMPLEMENTASI PERMAINAN MISI 3: KUIZ PINTAR JAWI (TRIVIA CHALLENGE)
+         */
+        function setupMission3(container) {
+            state.currentQuizIndex = 0;
+            renderQuizQuestion(container);
+        }
+
+        function renderQuizQuestion(container) {
+            // Tamat pemasa lama jika ada
+            if (state.quizTimer) clearInterval(state.quizTimer);
+
+            const totalQuestions = mission3Quiz.length;
+            
+            if (state.currentQuizIndex >= totalQuestions) {
+                showToast("Hebat! Anda lulus ujian Kuiz Pintar!", "🧠");
+                completeMission(true);
+                return;
+            }
+
+            const activeQuestion = mission3Quiz[state.currentQuizIndex];
+            state.quizTimeLeft = 15; // Set pemasa kepada 15 saat
+
+            // Padamkan kandungan lama
+            container.innerHTML = "";
+
+            // Struktur Kuiz
+            const quizCard = document.createElement("div");
+            quizCard.className = "w-full max-w-md flex flex-col gap-5";
+
+            // Pemasa bar (Progress visual)
+            const timerBox = document.createElement("div");
+            timerBox.className = "w-full bg-slate-900 rounded-full h-3 border border-slate-700 overflow-hidden";
+            timerBox.innerHTML = `<div id="quiz-timer-bar" class="bg-superhero-red h-full transition-all duration-1000" style="width: 100%"></div>`;
+            quizCard.appendChild(timerBox);
+
+            // Kad Soalan
+            const questionBox = document.createElement("div");
+            questionBox.className = "bg-slate-900 border-4 border-black p-5 rounded-2xl text-center relative";
+            questionBox.innerHTML = `
+                <div class="absolute -top-3 left-4 bg-superhero-purple text-white text-[10px] font-black px-2 py-0.5 rounded border-2 border-black uppercase">
+                    Soalan ${state.currentQuizIndex + 1} daripada ${totalQuestions}
+                </div>
+                <p class="text-lg font-bold mt-2 leading-relaxed text-slate-100">${activeQuestion.question}</p>
+                <p class="text-[10px] text-slate-500 mt-2 italic">Petunjuk: ${activeQuestion.hint}</p>
+            `;
+            quizCard.appendChild(questionBox);
+
+            // Kotak Pilihan Jawapan
+            const optionsBox = document.createElement("div");
+            optionsBox.className = "grid grid-cols-2 gap-3";
+
+            activeQuestion.options.forEach((opt, idx) => {
+                const optBtn = document.createElement("button");
+                // Tambah sokongan fon jawi jika teks mengandungi huruf jawi tunggal
+                const isJawi = opt.length === 1 && opt.match(/[\u0600-\u06FF]/);
+                
+                optBtn.className = `comic-btn bg-slate-900 hover:bg-slate-700 p-4 rounded-xl border-2 border-black text-center font-black transition-all ${isJawi ? 'jawi-text text-2xl' : 'text-base text-superhero-yellow'}`;
+                optBtn.innerText = opt;
+                optBtn.onclick = () => selectQuizOption(idx, activeQuestion.correct, optBtn);
+                optionsBox.appendChild(optBtn);
+            });
+
+            quizCard.appendChild(optionsBox);
+            container.appendChild(quizCard);
+
+            // Memulakan Pemasa Unduran
+            const timerBar = document.getElementById("quiz-timer-bar");
+            state.quizTimer = setInterval(() => {
+                state.quizTimeLeft--;
+                const percentage = (state.quizTimeLeft / 15) * 100;
+                timerBar.style.width = `${percentage}%`;
+
+                if (state.quizTimeLeft <= 4) {
+                    timerBar.classList.remove("bg-superhero-red");
+                    timerBar.classList.add("bg-amber-500", "animate-pulse"); // Amaran masa tamat
+                }
+
+                if (state.quizTimeLeft <= 0) {
+                    clearInterval(state.quizTimer);
+                    playSoundWrong();
+                    showToast("Masa tamat! Alamak, penjahat semakin mara!", "⏰");
+                    // Pindah ke soalan seterusnya secara automatik selepas seketika
+                    setTimeout(() => {
+                        state.currentQuizIndex++;
+                        renderQuizQuestion(container);
+                    }, 1500);
+                }
+            }, 1000);
+        }
+
+        function selectQuizOption(selectedIdx, correctIdx, btnElement) {
+            // Hentikan pemasa sebaik sahaja jawapan dipilih
+            if (state.quizTimer) clearInterval(state.quizTimer);
+
+            // Nyahaktifkan semua butang pilihan kuiz buat sementara untuk elakkan manipulasi berganda
+            const buttons = btnElement.parentElement.children;
+            for (let b of buttons) {
+                b.disabled = true;
+                b.classList.remove("hover:bg-slate-700");
+            }
+
+            if (selectedIdx === correctIdx) {
+                playSoundCorrect();
+                createSparks(btnElement);
+                btnElement.className = "comic-border bg-green-600 text-white p-4 rounded-xl font-black text-center text-xl flex items-center justify-center cursor-default";
+                
+                // Tambah mata ganjaran
+                state.score += 20;
+                document.getElementById("mission-score").innerText = `Markah: ${state.score}`;
+                showToast("Luar biasa! Jawapan anda TEPAT!", "🔥");
+            } else {
+                playSoundWrong();
+                btnElement.className = "comic-border bg-red-600 text-white p-4 rounded-xl font-black text-center text-xl flex items-center justify-center cursor-default";
+                // Tunjukkan jawapan yang betul kepada pelajar untuk tujuan pendidikan
+                buttons[correctIdx].className = "comic-border bg-green-600 text-white p-4 rounded-xl font-black text-center text-xl flex items-center justify-center cursor-default";
+                showToast("Kurang tepat! Belajar dari kesilapan ini ya.", "💡");
+            }
+
+            // Tunggu 2 saat sebelum ke soalan berikutnya
+            setTimeout(() => {
+                state.currentQuizIndex++;
+                const arena = document.getElementById("game-arena");
+                renderQuizQuestion(arena);
+            }, 2000);
+        }
+
+
+        /**
+         * SKRIN PENUTUP: TAHNIAH & PENERIMAAN BADGE
+         */
+        function showVictoryScreen() {
+            // Alihkan Skrin ke Paparan Akhir
+            document.getElementById("screen-game").classList.add("hidden");
+            document.getElementById("screen-victory").classList.remove("hidden");
+
+            // Tetapkan Butiran Pemenang
+            document.getElementById("victory-hero-name").innerText = state.player.name;
+            document.getElementById("victory-xp").innerText = state.player.xp;
+            document.getElementById("victory-level").innerText = state.player.level;
+
+            // Tukar emoji mengikut tahap kejayaan
+            const emojiBadge = document.getElementById("victory-badge-emoji");
+            if (state.player.level >= 3) {
+                emojiBadge.innerText = "👑";
+            } else {
+                emojiBadge.innerText = "🏆";
+            }
+
+            // Render Lencana yang berjaya dikumpul
+            const badgeContainer = document.getElementById("victory-badges");
+            badgeContainer.innerHTML = "";
+
+            if (state.player.badges.length === 0) {
+                badgeContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Tiada lencana dikumpul.</p>`;
+            } else {
+                state.player.badges.forEach(key => {
+                    const info = badgesData[key];
+                    const badgeDiv = document.createElement("div");
+                    badgeDiv.className = "bg-slate-800 border-2 border-black p-3 rounded-lg flex flex-col items-center min-w-[100px] text-center";
+                    badgeDiv.innerHTML = `
+                        <span class="text-3xl mb-1">${info.emoji}</span>
+                        <h4 class="text-[10px] font-black text-superhero-yellow uppercase tracking-wide leading-none">${info.title}</h4>
+                        <span class="text-[8px] text-slate-400 mt-1 leading-tight">${info.desc}</span>
+                    `;
+                    badgeContainer.appendChild(badgeDiv);
+                });
+            }
+
+            // Letupkan partikel confetti gembira
+            setTimeout(() => {
+                const header = document.getElementById("victory-hero-name");
+                createSparks(header);
+            }, 500);
+        }
+
+        // Mulakan semula semua statistik permainan
+        function resetGame() {
+            state.player.xp = 0;
+            state.player.level = 1;
+            state.player.badges = [];
+            state.currentMission = 1;
+            state.score = 0;
+
+            document.getElementById("screen-victory").classList.add("hidden");
+            document.getElementById("main-header").classList.add("hidden");
+            document.getElementById("screen-welcome").classList.remove("hidden");
+            document.getElementById("mission-score").innerText = "Markah: 0";
+        }
+    </script>
+</body>
+</html>
